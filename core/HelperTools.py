@@ -163,6 +163,56 @@ def sortDF(dframe,col,asc):         #Pandas-df, String, Boolean
 df_cols_assign_alias = \
     lambda x,y: x.rename(columns=dict(zip(y["scenario"], y["sc_alias"]))) 
 
+def check_data_quality(df, required_columns, column_formats, value_ranges=None):
+    """
+    Automatically checks the data quality of a DataFrame.
+    Parameters:
+    - df (pd.DataFrame): The DataFrame to check.
+    - required_columns (list): List of required columns.
+    - column_formats (dict): Dictionary specifying expected data types for each column.
+    - value_ranges (dict): Optional dictionary specifying acceptable ranges for numeric columns.
+
+    Returns:
+    - dict: Dictionary containing data quality issues.
+    """
+    issues = {}
+
+    # Check for required columns
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        issues['missing_columns'] = missing_columns
+
+    # Check column formats
+    format_issues = {}
+    for col, expected_type in column_formats.items():
+        if col in df.columns:
+            if not df[col].map(lambda x: isinstance(x, expected_type)).all():
+                format_issues[col] = f"Expected {expected_type}, but found different types"
+    if format_issues:
+        issues['format_issues'] = format_issues
+
+    # Check for missing values
+    missing_values = df.isnull().sum()
+    missing_values = missing_values[missing_values > 0]
+    if not missing_values.empty:
+        issues['missing_values'] = missing_values.to_dict()
+
+    # Check value ranges
+    if value_ranges:
+        range_issues = {}
+        for col, (min_val, max_val) in value_ranges.items():
+            if col in df.columns:
+                out_of_range = df[(df[col] < min_val) | (df[col] > max_val)]
+                if not out_of_range.empty:
+                    range_issues[col] = f"Values out of range [{min_val}, {max_val}]"
+        if range_issues:
+            issues['range_issues'] = range_issues
+
+    # Check for duplicate rows
+    if df.duplicated().any():
+        issues['duplicates'] = f"Found {df.duplicated().sum()} duplicate rows"
+
+    return issues
 
 
 
