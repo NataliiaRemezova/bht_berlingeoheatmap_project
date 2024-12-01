@@ -19,15 +19,10 @@ from config import pdict
 def main():
     """Main: Generation of Streamlit App for visualizing electric charging stations & residents in Berlin"""
 
-    # df_geodat_plz = gpd.read_file('datasets/berlin_postleitzahlen/berlin_postleitzahlen.shp')
-
     # Load data (replace 'your_file_path' with actual file paths or data sources)
-    df_geodat_plz = pd.read_csv('datasets/geodata_berlin_plz.csv', sep=';')  # For geospatial data (adjust filename as needed)
-    # df_lstat = pd.read_csv('datasets/Ladesaeulenregister.csv', sep=';', skiprows=8)
-    # df_lstat.columns = df_lstat.columns.str.strip()
-    # df_lstat = df_lstat.loc[:, ~df_lstat.columns.str.contains('^Unnamed')] 
+    df_geodat_plz = pd.read_csv('datasets/geodata_berlin_plz.csv', sep=';')  
     df_lstat = pd.read_excel('datasets/Ladesaeulenregister_SEP.xlsx', header=10)
-    df_residents = pd.read_csv('datasets/plz_einwohner.csv')  # Adjust the path accordingly
+    df_residents = pd.read_csv('datasets/plz_einwohner.csv')
 
     # Preprocess data
     gdf_lstat = m1.preprop_lstat(df_lstat, df_geodat_plz, pdict)
